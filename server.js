@@ -4,13 +4,14 @@ const connectToDb = require('./db');
 const dotenv = require('dotenv').config()
 const router = require('./routes/routes');
 
-
 const app = express();
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin:['https://appleton-frontend.vercel.app']
+}));
 
 connectToDb();
-  
+
 app.use(router);
 
 app.listen(process.env.port , ()=>{
