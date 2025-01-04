@@ -9,13 +9,17 @@ const {
     getAllOrders,
     getProductDetails,
     orders,
-    getOrderById
+    getOrderById,
+    updatePassword,
+    searchResult
 } = require('../controllers/controllers.js')
 
 
 router.post('/register', createUser);
 
 router.post('/login', userLogin);
+
+router.post('/forgot-password', updatePassword);
 
 router.get('/products', authentication, getallProducts);
 
@@ -27,8 +31,8 @@ router.post('/orders', authentication, orders);
 
 router.get('/products/:id', authentication, getProductDetails);
 
-//router.post('/orders', authentication, orders);
-
 router.get('/orders/:id', authentication, getOrderById);
+
+router.post('/search/:input', authentication, searchResult);
 
 module.exports = router;

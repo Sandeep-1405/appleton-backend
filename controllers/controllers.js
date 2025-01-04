@@ -40,7 +40,7 @@ const userLogin = async (req, res) => {
             return res.status(401).json({ message: "Invalid password" });
         }
 
-        const jwtToken = jwt.sign({ userId: userDetails._id.toString(), email }, process.env.JWT_SECRET || "JWT_SECRET", { expiresIn: '1h' });
+        const jwtToken = jwt.sign({ userId: userDetails._id.toString(), email }, process.env.JWT_SECRET || "JWT_SECRET");
 
         return res.status(200).json({ message: "Login successful", jwtToken });
     } catch (error) {
@@ -162,7 +162,6 @@ const getOrderById = async (req, res) => {
     const userId = req.userId;
 
     try {
-        // Fetch the order and populate the 'cartItems.productId' field with product details
         const order = await Orders.findOne({ _id: id, userId: userId })
             .populate({
                 path: 'cartItems.productId',
@@ -180,7 +179,46 @@ const getOrderById = async (req, res) => {
     }
 };
 
+const updatePassword = async (req, res) => {
+    const { email, password } = req.body;
 
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const updatedUser = await Register.findOneAndUpdate(
+            { email },
+            { $set: { password: hashedPassword } },
+            { new: true }
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        return res.status(200).json({ message: "Password updated successfully" });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Server error" });
+    }
+};
+
+const searchResult = async (req, res) => {
+    const userId = req.userId;
+    const { input } = req.params;
+
+    try {
+        const products = await Product.find(
+            { 
+                userId, 
+                name: { $regex: input, $options: "i" }
+            }
+        );
+        res.status(200).json(products);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Server error" });
+    }
+};
 
 
 module.exports = {
@@ -193,5 +231,7 @@ module.exports = {
     getProductDetails,
     orders,
     getOrders,
-    getOrderById
+    getOrderById,
+    updatePassword,
+    searchResult
 };
